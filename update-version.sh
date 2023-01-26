@@ -1,11 +1,13 @@
 #!/bin/bash
 
-git checkout main
-git fetch --all --prune
-git rebase
-git -C repo/ checkout -b bugfix
+git pull
 
-echo "Today is $date"
+date > version
 
-git -C repo/ commit -a -m "Fixed bug"
+git add version
+
+git commit -m "new date"
+
 git push
+
+echo "done :)"
