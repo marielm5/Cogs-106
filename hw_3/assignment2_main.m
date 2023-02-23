@@ -40,5 +40,18 @@ classdef SignalDetection
             Multiplication = SignalDetection(obj.hits .* k, obj.misses .* k, obj.falseAlarms .* k, obj.correctRejections .* k);
         end
 
+function ROC = plot_roc(obj)
+            labels = [ones(obj.misses + obj.hits,1); zeros(obj.falseAlarms + obj.correctRejections,1)];
+            %vector for signal observation (1) and noise (0)
+            scores = [ones(obj.hits, 1); zeros(obj.misses, 1); zeros(obj.falseAlarms, 1); ones(obj.correctRejections, 1)];
+            % vector for performance; positive examples(1) and negative examples (0)
+            
+            [FA_rate, Hit_rate] = perfcurve(labels, scores, 1); 
+            ROC = plot(FA_rate, Hit_rate, 'Marker','*');
+            xlabel('False Alarm');
+            ylabel('Hit Rate');
+            title('ROC Curve');
+        end
+
     end
 end
