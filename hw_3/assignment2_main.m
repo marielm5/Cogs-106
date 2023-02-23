@@ -13,6 +13,14 @@ classdef SignalDetection
             obj.falseAlarms = falseAlarms;
             obj.correctRejections = correctRejections; 
         end
+	
+	function H = hit_rate(obj)
+            % calculate hit rate (H)
+            H = obj.hits/(obj.hits + obj.misses);
+
+	function  FA = FA(obj)
+            % calculate false alarm rate (FA)
+            FA = obj.falseAlarms/(obj.falseAlarms + obj.correctRejections);
    
         function d_prime = d_prime(obj)
             hitRate = obj.hits / (obj.hits + obj.misses);
