@@ -1,0 +1,11 @@
+function testCorruption(testCase)
+
+obj = SignalDetection(12, 7, 3, 4);
+obj.hits = 15;
+obj.misses = 10;
+obj.falseAlarms = 15;
+obj.correctRejections = 5;
+actual   = obj.d_prime();
+expected = -0.421142647060282;
+testCase.verifyEqual(actual, expected,'Abs', 1e-6)
+end 
