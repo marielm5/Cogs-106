@@ -27,10 +27,9 @@ classdef SignalDetection
             d_prime =  norminv(hit_rate(obj)) - norminv(obj.FA());
         end
 
-        function criterion = criterion(obj)
-            hitRate = obj.hits / (obj.hits + obj.misses);
-            falseAlarmRate = obj.falseAlarms / (obj.falseAlarms + obj.correctRejections);
-            criterion = -0.5 * (norminv(hitRate) + norminv(falseAlarmRate));
+        function C = criterion(obj)
+            % calculate criterion (C)
+          C =  -0.5 *(norminv(obj.hit_rate()) + norminv(obj.FA()));
         end
     end
 end
