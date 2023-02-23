@@ -31,5 +31,12 @@ classdef SignalDetection
             % calculate criterion (C)
           C =  -0.5 *(norminv(obj.hit_rate()) + norminv(obj.FA()));
         end
+
+	function Addition = plus (obj1,obj2)
+            Addition = SignalDetection(obj1.hits + obj2.hits, obj1.misses + obj2.misses, obj1.falseAlarms + obj2.falseAlarms, obj1.correctRejections +obj2.correctRejections);
+        end
+
+
+
     end
 end
