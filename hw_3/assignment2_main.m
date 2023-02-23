@@ -36,7 +36,9 @@ classdef SignalDetection
             Addition = SignalDetection(obj1.hits + obj2.hits, obj1.misses + obj2.misses, obj1.falseAlarms + obj2.falseAlarms, obj1.correctRejections +obj2.correctRejections);
         end
 
-
+	function Multiplication = mtimes(obj,k)
+            Multiplication = SignalDetection(obj.hits .* k, obj.misses .* k, obj.falseAlarms .* k, obj.correctRejections .* k);
+        end
 
     end
 end
