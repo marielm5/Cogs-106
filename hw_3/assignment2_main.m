@@ -52,5 +52,25 @@ classdef SignalDetection
             xlim( [0, 1] )
             ylim( [0, 1] )
         end
+	
+	function SDT = plot_sdt(obj)
+           x = linspace(-5,5,100);
+           Noise = normpdf(x, 0, 1);
+           Signal = (normpdf(x, obj.d_prime, 1));
+           
+           plot(x, Noise, 'c', 'LineWidth', 2)
+           hold on
+           plot(x, Signal, 'm', 'LineWidth', 2);
+          
+           xline(obj.d_prime/2 + obj.criterion, '--'); %threshold line C
+           plot([0, obj.d_prime],[max(Noise),max(Signal)], 'k', 'LineWidth',2) % D line
+           
+           title('Signal Detection Theory Plot')
+           xlabel('Signal Strength')
+           ylabel ('Probability ')
+           ylim([0,1]);
+           legend({'Signal', 'Noise', 'C Threshold', 'D Line'});
+
+        end
     end
 end
