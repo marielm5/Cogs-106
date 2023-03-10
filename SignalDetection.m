@@ -1,5 +1,5 @@
 classdef SignalDetection
-    %  Implements four core Signal Detection Theory formulas: Hit Rate, False Alarm Rate, d-prime, and Criterion. 
+    %  Implements four core Signal Detection Theory formulas: Hit Rate, False Alarm Rate, d-prime, and Criterion.
 
     properties
         hits
@@ -20,7 +20,7 @@ classdef SignalDetection
             % calculate hit rate (H)
             H = obj.hits/(obj.hits + obj.misses);
         end
-        
+
         function FA = FA(obj)
             % calculate false alarm rate (FA)
             FA = obj.falseAlarms/(obj.falseAlarms + obj.correctRejections);
@@ -30,16 +30,16 @@ classdef SignalDetection
             % calculate d-prime
             d_prime =  norminv(hit_rate(obj)) - norminv(obj.FA());
         end
-        
+
         function C = criterion(obj)
             % calculate criterion (C)
-          C =  -0.5 *(norminv(obj.hit_rate()) + norminv(obj.FA()));
+            C =  -0.5 *(norminv(obj.hit_rate()) + norminv(obj.FA()));
         end
 
         function Addition = plus (obj1,obj2)
             Addition = SignalDetection(obj1.hits + obj2.hits, obj1.misses + obj2.misses, obj1.falseAlarms + obj2.falseAlarms, obj1.correctRejections +obj2.correctRejections);
         end
-        
+
         function Multiplication = mtimes(obj,k)
             Multiplication = SignalDetection(obj.hits .* k, obj.misses .* k, obj.falseAlarms .* k, obj.correctRejections .* k);
         end
@@ -56,32 +56,34 @@ classdef SignalDetection
         end
 
         function SDT = plot_sdt(obj)
-           x = linspace(-5,5,100);
-           Noise = normpdf(x, 0, 1);
-           Signal = (normpdf(x, obj.d_prime, 1));
-           
-           plot(x, Noise, 'c', 'LineWidth', 2)
-           hold on
-           plot(x, Signal, 'm', 'LineWidth', 2);
-          
-           xline(obj.d_prime/2 + obj.criterion, '--'); %threshold line C
-           plot([0, obj.d_prime],[max(Noise),max(Signal)], 'k', 'LineWidth',2) % D line
-           
-           title('Signal Detection Theory Plot')
-           xlabel('Signal Strength')
-           ylabel ('Probability ')
-           ylim([0,1]);
-           legend({'Signal', 'Noise', 'C Threshold', 'D Line'});
+            x = linspace(-5,5,100);
+            Noise = normpdf(x, 0, 1);
+            Signal = (normpdf(x, obj.d_prime, 1));
+
+            plot(x, Noise, 'c', 'LineWidth', 2)
+            hold on
+            plot(x, Signal, 'm', 'LineWidth', 2);
+
+            xline(obj.d_prime/2 + obj.criterion, '--'); %threshold line C
+            plot([0, obj.d_prime],[max(Noise),max(Signal)], 'k', 'LineWidth',2) % D line
+
+            title('Signal Detection Theory Plot')
+            xlabel('Signal Strength')
+            ylabel ('Probability ')
+            ylim([0,1]);
+            legend({'Signal', 'Noise', 'C Threshold', 'D Line'});
 
         end
-        
+
+%% New Assignmnet 4 Methods
+
         function ell = nLogLikelihood(obj, hitRate, falseAlarmRate)
-            ell = - obj.hits * log(hitRate) - obj.misses * log(1 - hitRate) ...
-          - obj.falseAlarms * log(falseAlarmRate) ...
-          - obj.correctRejections * log(1 - falseAlarmRate);
+            ell = - (obj.hits * log(hitRate) + obj.misses * log(1 - hitRate) ...
+                + obj.falseAlarms * log(falseAlarmRate) ...
+                + obj.correctRejections * log(1 - falseAlarmRate));
         end
     end
-    
+
     methods (Static)
         function sdtList = simulate(dprime, criteriaList, signalCount, noiseCount)
             sdtList = [];
@@ -101,39 +103,50 @@ classdef SignalDetection
         function hitRate = rocCurve(falseAlarmRate, a)
             hitRate = [];
             for i = 1:length(falseAlarmRate)
-                hitRate = [hitRate; normcdf(a + norminv(falseAlarmRate))];
-            end 
-        end 
-
-    function rocLoss = rocLoss(a, sdtList)
-       ell = zeros(length(sdtList(1)));
-
-        for i = 1:length(sdtList)
-            obs_FARate = FA(sdtList(i));
-            pre_HitRate = SignalDetection.rocCurve(obs_FARate,a);
-            ell(i) = nLogLikelihood(sdtList(i), obs_FARate, pre_HitRate);
+                hitRate = normcdf(a + norminv(falseAlarmRate));
+            end
         end
-        rocLoss = sum(ell);
-        rocLoss = rocLoss(1);
-            
-    end
 
-    function plotroc = plot_roc(sdtList)
-    hold on;
-    for i = 1:length(sdtList)
-        x = sdtList(i).FA();
-        y = sdtList(i).hit_rate();
-        scatter(x, y, 'filled', 'MarkerFaceColor','k' );
-    end
-    line([0, 1], [0, 1],'LineStyle', '--');
-    grid on
-    hold off;
+        function rocLoss = rocLoss(a, sdtList)
+            ell = [];
+            for i = 1:length(sdtList)
+                obs_FARate = FA(sdtList(i));
+                pre_HitRate = SignalDetection.rocCurve(obs_FARate,a);
+                ell =  [ell; nLogLikelihood(sdtList(i), pre_HitRate, obs_FARate)];
+            end
+            rocLoss = sum(ell);
+        end
 
-    title( 'ROC Curve' )
-    xlabel('False Alarm Rate');
-    ylabel('Hit Rate');
-    xlim([0, 1]);
-    ylim([0, 1]);
+        function plotroc = plot_roc(sdtList)
+            hold on;
+            for i = 1:length(sdtList)
+                x = sdtList(i).FA();
+                y = sdtList(i).hit_rate();
+                scatter(x, y, 'filled', 'MarkerFaceColor','k' );
+            end
+            line([0, 1], [0, 1],'LineStyle', '--');
+            grid on
+            hold off;
+
+            title( 'ROC Curve' )
+            xlabel('False Alarm Rate');
+            ylabel('Hit Rate');
+            xlim([0, 1]);
+            ylim([0, 1]);
+        end
+
+        function fit_a = fit_roc(sdtList)
+            a_func = @(a)(SignalDetection.rocLoss(a, sdtList));
+            start = 0;
+            fit_a= fminsearch(a_func, start);
+
+            SignalDetection.plot_roc(sdtList);
+            hold on;
+            x = linspace(0, 1);
+            y = SignalDetection.rocCurve(x, fit_a);
+            plot(x, y, 'LineWidth', 2);
+            hold off;
+
+        end
+    end
 end
-    end
-    end 
