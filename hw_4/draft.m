@@ -119,18 +119,21 @@ classdef SignalDetection
     end
 
     function plotroc = plot_roc(sdtList)
-        hold on;
-        for i = 1:length(sdtList)
-            x = [0, sdtList(i).FA(), 1];
-            y = [0, sdtList(i).hit_rate(), 1];
-            plot(x, y);
-        end
-        hold off;
-        xlabel('False Alarm Rate');
-        ylabel('Hit Rate');
-        xlim([0, 1]);
-        ylim([0, 1]);
-
+    hold on;
+    for i = 1:length(sdtList)
+        x = sdtList(i).FA();
+        y = sdtList(i).hit_rate();
+        scatter(x, y, 'filled', 'MarkerFaceColor','k' );
     end
+    line([0, 1], [0, 1],'LineStyle', '--');
+    grid on
+    hold off;
+
+    title( 'ROC Curve' )
+    xlabel('False Alarm Rate');
+    ylabel('Hit Rate');
+    xlim([0, 1]);
+    ylim([0, 1]);
+end
     end
     end 
